@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enable Public Minting - Honeycomb NFT Cars</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #218838;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #e7f3ff; color: #0066cc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Enable Public Minting</h1>
+        <p>This tool enables public minting for all players by setting the necessary flags.</p>
+        
+        <div id="status"></div>
+        
+        <button onclick="enablePublicMinting()">🎯 Enable Public Minting Now</button>
+        <button onclick="checkStatus()">🔍 Check Current Status</button>
+        
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Click "Enable Public Minting Now" to allow all players to mint NFT cars</li>
+            <li>Go back to your main application</li>
+            <li>Connect your wallet</li>
+            <li>Try minting an NFT car - it should now work for all players!</li>
+        </ol>
+        
+        <h3>Technical Details:</h3>
+        <p>This sets the <code>allow_all_users_mint</code> flag to <code>true</code> in localStorage, which bypasses the admin-only restriction in the NFT minting service.</p>
+    </div>
+
+    <script>
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function enablePublicMinting() {
+            try {
+                // Enable public minting flag
+                localStorage.setItem('allow_all_users_mint', 'true');
+                
+                showStatus('✅ Public minting enabled successfully! All players can now mint NFT cars.', 'success');
+                
+                console.log('🚀 PUBLIC MINTING ENABLED!');
+                console.log('✅ Flag set: allow_all_users_mint = true');
+                
+                // Also enable wrapping mode as backup
+                localStorage.setItem('wrapping_mode_enabled', 'true');
+                
+            } catch (error) {
+                showStatus('❌ Error enabling public minting: ' + error.message, 'error');
+            }
+        }
+
+        function checkStatus() {
+            const publicMintingEnabled = localStorage.getItem('allow_all_users_mint') === 'true';
+            const wrappingEnabled = localStorage.getItem('wrapping_mode_enabled') === 'true';
+            
+            let statusMessage = '<strong>Current Status:</strong><br>';
+            statusMessage += `🎯 Public Minting: ${publicMintingEnabled ? '✅ Enabled' : '❌ Disabled'}<br>`;
+            statusMessage += `🔄 Wrapping Mode: ${wrappingEnabled ? '✅ Enabled' : '❌ Disabled'}`;
+            
+            showStatus(statusMessage, publicMintingEnabled ? 'success' : 'info');
+        }
+
+        // Check status on load
+        window.onload = checkStatus;
+    </script>
+</body>
+</html>

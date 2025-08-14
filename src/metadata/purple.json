@@ -1,0 +1,25 @@
+{
+  "name": "Titan Cruiser",
+  "symbol": "CAR",
+  "description": "A bulky car with massive control but slower acceleration.",
+  "image": "purple.jpg",
+  "attributes": [
+    { "trait_type": "Speed", "value": 6 },
+    { "trait_type": "Acceleration", "value": 4 },
+    { "trait_type": "Handling", "value": 10 }
+  ],
+  "properties": {
+    "creators": [
+      {
+        "address": "7FG46M1Z6hyEZZwr48Nt9ed8nvYm1rCsyxXgU9t3TBmS",
+        "share": 100
+      }
+    ],
+    "files": [
+      {
+        "uri": "purple.jpg",
+        "type": "image/jpeg"
+      }
+    ]
+  }
+}

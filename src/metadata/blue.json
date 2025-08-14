@@ -1,0 +1,25 @@
+{
+  "name": "Nitro Runner",
+  "symbol": "CAR",
+  "description": "A high-speed racing machine with blazing acceleration.",
+  "image": "blue.jpg",
+  "attributes": [
+    { "trait_type": "Speed", "value": 10 },
+    { "trait_type": "Acceleration", "value": 9 },
+    { "trait_type": "Handling", "value": 6 }
+  ],
+  "properties": {
+    "creators": [
+      {
+        "address": "7FG46M1Z6hyEZZwr48Nt9ed8nvYm1rCsyxXgU9t3TBmS",
+        "share": 100
+      }
+    ],
+    "files": [
+      {
+        "uri": "blue.jpg",
+        "type": "image/jpeg"
+      }
+    ]
+  }
+}
