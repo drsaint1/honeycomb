@@ -155,8 +155,8 @@ export class MissionService {
       signMessageFn
     );
     
-    // Duration already in seconds
-    const durationSeconds = missionData.duration;
+    // Duration in hours, convert to seconds
+    const durationSeconds = missionData.durationHours * 3600;
     
     console.log(`🎯 Creating mission "${missionData.name}" with resource: ${resourceAddress}`);
     console.log(`🔍 Mission cost address: ${resourceAddress}`);
@@ -1664,7 +1664,7 @@ export class MissionService {
         name: "Speed Demon Challenge",
         description: "Complete a 4-hour racing mission to earn XP and SPEEDY tokens",
         costAmount: String(10 * 10 ** 6), // 10 SPEEDY tokens (6 decimals)
-        duration: "14400", // 4 hours in seconds
+        durationHours: 4, // 4 hours
         minXp: "0", // Minimum XP required
         xpReward: { min: "100", max: "200" },
         resourceReward: { min: String(25 * 10 ** 6), max: String(50 * 10 ** 6) }, // 25-50 SPEEDY tokens (6 decimals)
@@ -1673,7 +1673,7 @@ export class MissionService {
         name: "Endurance Race",
         description: "Complete an 8-hour endurance mission for bigger rewards",
         costAmount: String(20 * 10 ** 6), // 20 SPEEDY tokens (6 decimals)
-        duration: "28800", // 8 hours in seconds
+        durationHours: 8, // 8 hours
         minXp: "10", // Minimum XP required
         xpReward: { min: "250", max: "400" },
         resourceReward: { min: String(30 * 10 ** 6), max: String(60 * 10 ** 6) }, // 30-60 SPEEDY tokens (6 decimals)
@@ -1682,7 +1682,7 @@ export class MissionService {
         name: "Daily Sprint",
         description: "Quick 1-hour mission for fast rewards",
         costAmount: String(5 * 10 ** 6), // 5 SPEEDY tokens (6 decimals)
-        duration: "3600", // 1 hour in seconds
+        durationHours: 1, // 1 hour
         minXp: "10", // Minimum XP required
         xpReward: { min: "25", max: "50" },
         resourceReward: { min: String(15 * 10 ** 6), max: String(25 * 10 ** 6) }, // 15-25 SPEEDY tokens (6 decimals)

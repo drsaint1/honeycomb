@@ -88,17 +88,17 @@ const HoneycombCarGame: React.FC = () => {
 
   // Three.js refs
   const mountRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<THREE.Scene>();
-  const rendererRef = useRef<THREE.WebGLRenderer>();
-  const cameraRef = useRef<THREE.PerspectiveCamera>();
-  const carRef = useRef<THREE.Group>();
-  const roadRef = useRef<THREE.Mesh>();
+  const sceneRef = useRef<THREE.Scene>(null!);
+  const rendererRef = useRef<THREE.WebGLRenderer>(null!);
+  const cameraRef = useRef<THREE.PerspectiveCamera>(null!);
+  const carRef = useRef<THREE.Group>(null!);
+  const roadRef = useRef<THREE.Mesh>(null!);
   const roadLinesRef = useRef<THREE.Mesh[]>([]);
   const obstaclesRef = useRef<THREE.Group[]>([]);
   const bonusBoxesRef = useRef<THREE.Group[]>([]);
   const goldenKeysRef = useRef<THREE.Group[]>([]);
-  const invisibilityIndicatorRef = useRef<THREE.Mesh>();
-  const animationIdRef = useRef<number>();
+  const invisibilityIndicatorRef = useRef<THREE.Mesh>(null!);
+  const animationIdRef = useRef<number>(0);
 
   // Game state
   const [score, setScore] = useState(0);
@@ -569,8 +569,15 @@ const HoneycombCarGame: React.FC = () => {
       carRef.current.children.forEach((child) => {
         const mesh = child as THREE.Mesh;
         if (mesh.material) {
-          mesh.material.transparent = true;
-          (mesh.material as any).opacity = 0.7;
+          if (Array.isArray(mesh.material)) {
+            mesh.material.forEach(mat => {
+              mat.transparent = true;
+              (mat as any).opacity = 0.7;
+            });
+          } else {
+            mesh.material.transparent = true;
+            (mesh.material as any).opacity = 0.7;
+          }
         }
       });
     }
@@ -596,8 +603,15 @@ const HoneycombCarGame: React.FC = () => {
       carRef.current.children.forEach((child) => {
         const mesh = child as THREE.Mesh;
         if (mesh.material) {
-          mesh.material.transparent = false;
-          (mesh.material as any).opacity = 1.0;
+          if (Array.isArray(mesh.material)) {
+            mesh.material.forEach(mat => {
+              mat.transparent = false;
+              (mat as any).opacity = 1.0;
+            });
+          } else {
+            mesh.material.transparent = false;
+            (mesh.material as any).opacity = 1.0;
+          }
         }
       });
     }
@@ -998,7 +1012,7 @@ const HoneycombCarGame: React.FC = () => {
               finalScore: gameStatsRef.current.finalScore,
               distanceTraveled: gameStatsRef.current.distance,
               obstaclesAvoided: gameStatsRef.current.obstaclesAvoided || 0,
-            }),
+            }).xpEarned,
             {
               gamesPlayed: (
                 currentHoneycomb.playerProfile.gamesPlayed + 1
@@ -1311,8 +1325,15 @@ const HoneycombCarGame: React.FC = () => {
       carRef.current.children.forEach((child) => {
         const mesh = child as THREE.Mesh;
         if (mesh.material) {
-          mesh.material.transparent = false;
-          (mesh.material as any).opacity = 1.0;
+          if (Array.isArray(mesh.material)) {
+            mesh.material.forEach(mat => {
+              mat.transparent = false;
+              (mat as any).opacity = 1.0;
+            });
+          } else {
+            mesh.material.transparent = false;
+            (mesh.material as any).opacity = 1.0;
+          }
         }
       });
     }

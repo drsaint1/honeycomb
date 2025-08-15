@@ -51,10 +51,10 @@ export const CarSelectionPage: React.FC<CarSelectionPageProps> = ({ onCarSelecte
         });
         
         // Default mappings for unmapped cars
-        const defaultMappings = [
-          { name: "Nitro Runner", image: "https://arweave.net/AUgjbSGUbXzvjfX_0y2hHG9mVRH1Syk_ZI0iqmN8OAw", description: "A high-speed racing machine with blazing acceleration", traits: { speed: 10, handling: 6, acceleration: 9, durability: 5, rarity: "legendary" }},
-          { name: "Drift Master", image: "https://arweave.net/zsDN0qpQw49dlVGIV5J84qONMlIBz29QmCI2RzSN4R0", description: "A balanced car with great handling for tight turns", traits: { speed: 7, handling: 9, acceleration: 7, durability: 7, rarity: "rare" }},
-          { name: "Titan Cruiser", image: "https://arweave.net/JDrAc2F2v5fPROokIQLiXuQhFaiXPQK2R_Ly4jRDtmc", description: "A bulky car with massive control but slower acceleration", traits: { speed: 6, handling: 10, acceleration: 4, durability: 9, rarity: "uncommon" }}
+        const defaultMappings: Partial<NFTCar>[] = [
+          { name: "Nitro Runner", image: "https://arweave.net/AUgjbSGUbXzvjfX_0y2hHG9mVRH1Syk_ZI0iqmN8OAw", description: "A high-speed racing machine with blazing acceleration", traits: { speed: 10, handling: 6, acceleration: 9, durability: 5, rarity: "legendary" as const }},
+          { name: "Drift Master", image: "https://arweave.net/zsDN0qpQw49dlVGIV5J84qONMlIBz29QmCI2RzSN4R0", description: "A balanced car with great handling for tight turns", traits: { speed: 7, handling: 9, acceleration: 7, durability: 7, rarity: "rare" as const }},
+          { name: "Titan Cruiser", image: "https://arweave.net/JDrAc2F2v5fPROokIQLiXuQhFaiXPQK2R_Ly4jRDtmc", description: "A bulky car with massive control but slower acceleration", traits: { speed: 6, handling: 10, acceleration: 4, durability: 9, rarity: "uncommon" as const }}
         ];
         
         cars = cars.map((car, index) => {

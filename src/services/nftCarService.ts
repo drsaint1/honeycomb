@@ -811,11 +811,12 @@ class NFTCarService {
 
       // Create character using Honeycomb's expected format
 
+      // Get project authority since it's required
+      const projectAuthority = await this.getProjectAuthority();
+      console.log("🔑 Using project authority:", projectAuthority);
+
       let transactionResponse;
       try {
-        // Get project authority since it's required
-        const projectAuthority = await this.getProjectAuthority();
-        console.log("🔑 Using project authority:", projectAuthority);
 
         // Try different authority configurations based on user type
         const isUserAdmin = wallet.publicKey.toString() === projectAuthority;
@@ -1169,7 +1170,7 @@ class NFTCarService {
         );
         console.error("❌ Error details:", {
           userWallet: wallet.publicKey.toString(),
-          transactionParams,
+          transactionParams: transactionParams,
           errorMessage: createError.message,
         });
 
