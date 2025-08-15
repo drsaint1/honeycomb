@@ -71,6 +71,29 @@ class NFTCarService {
   private projectAddress: string;
   private nftConfig: any = null;
 
+  // Helper function to get properly bound signMessage function
+  private getSignMessageFunction(
+    wallet: any
+  ): (message: Uint8Array) => Promise<Uint8Array> {
+    // If we have the original wallet (from CarMinting), use that for signMessage
+    if (wallet.originalWallet?.adapter?.signMessage) {
+      const originalAdapter = wallet.originalWallet.adapter;
+      return originalAdapter.signMessage.bind(originalAdapter);
+    }
+
+    // Try the adapter's signMessage with proper binding
+    if (wallet.adapter?.signMessage) {
+      return wallet.adapter.signMessage.bind(wallet.adapter);
+    }
+
+    // Try the wallet's own signMessage
+    if (wallet.signMessage && typeof wallet.signMessage === "function") {
+      return wallet.signMessage.bind(wallet);
+    }
+
+    throw new Error("Wallet does not support message signing");
+  }
+
   constructor() {
     this.client = createEdgeClient(
       import.meta.env.VITE_PUBLIC_HONEYCOMB_API_URL ||
@@ -316,6 +339,10 @@ class NFTCarService {
               authority: userAddress,
               payer: userAddress,
               user: userId,
+              platformData: {
+                addXp: 100, // Give new users 100 starting XP
+                addAchievements: [0] // Give first achievement
+              }
             },
             {
               fetchOptions: {
@@ -449,7 +476,7 @@ class NFTCarService {
 
       const accessToken = await getOrCreateAccessToken(
         adminWallet.publicKey.toString(),
-        adminWallet.signMessage || adminWallet.adapter.signMessage
+        this.getSignMessageFunction(adminWallet)
       );
 
       // Step 1: Create a "Wrapped" character model (from official docs)
@@ -606,7 +633,7 @@ class NFTCarService {
 
       const accessToken = await getOrCreateAccessToken(
         adminWallet.publicKey.toString(),
-        adminWallet.signMessage || adminWallet.adapter.signMessage
+        this.getSignMessageFunction(adminWallet)
       );
 
       // Ensure config is loaded
@@ -700,10 +727,10 @@ class NFTCarService {
         return { success: false, error: "Invalid car type" };
       }
 
-      // Get access token
+      // Get access token with properly bound signMessage function
       const accessToken = await getOrCreateAccessToken(
         wallet.publicKey.toString(),
-        wallet.signMessage?.bind(wallet) || wallet.adapter.signMessage?.bind(wallet.adapter) || wallet.adapter.signMessage
+        this.getSignMessageFunction(wallet)
       );
 
       // Ensure user has profile before minting
@@ -920,115 +947,19 @@ class NFTCarService {
           });
         };
 
-        let transactionParams;
+        // Use EXACT official GraphQL schema format from documentation
+        console.log("🚀 Using EXACT official GraphQL schema format...");
 
-        if (isUserAdmin) {
-          // Admin user - using EXACT official docs format (lines 187-193)
-          console.log(
-            "🔄 Admin user - using EXACT official Without an NFT format..."
-          );
-          transactionParams = {
-            project: this.projectAddress,
-            assemblerConfig: assemblerConfigAddr,
-            characterModel: characterModelAddr,
-            wallet: wallet.publicKey.toString(), // User wallet - this user will receive the character
-            owner: wallet.publicKey.toString(), // Required for GraphQL mutation
-            authority: wallet.publicKey.toString(), // Required for GraphQL mutation
-            uri:
-              carTemplate.image ||
-              `https://arweave.net/${carTemplate.name
-                .toLowerCase()
-                .replace(/\s+/g, "-")}.json`,
-          };
-        } else {
-          // Check which public minting method is enabled
-          const allowAllUsers =
-            localStorage.getItem("allow_all_users_mint") === "true";
-          const wrappingEnabled =
-            localStorage.getItem("wrapping_mode_enabled") === "true";
-
-          console.log("🔍 DEBUG: allowAllUsers =", allowAllUsers);
-          console.log("🔍 DEBUG: wrappingEnabled =", wrappingEnabled);
-          console.log(
-            "🔍 DEBUG: localStorage allow_all_users_mint =",
-            localStorage.getItem("allow_all_users_mint")
-          );
-
-          if (allowAllUsers) {
-            // PUBLIC MINTING - using EXACT official docs format (lines 187-193)
-            console.log(
-              "🚀 PUBLIC MINTING - using EXACT official Without an NFT format..."
-            );
-            transactionParams = {
-              project: this.projectAddress,
-              assemblerConfig: assemblerConfigAddr,
-              characterModel: characterModelAddr,
-              wallet: wallet.publicKey.toString(), // User wallet - this user will receive the character
-              owner: wallet.publicKey.toString(), // Required for GraphQL mutation
-              authority: wallet.publicKey.toString(), // Required for GraphQL mutation
-              uri:
-                carTemplate.image ||
-                `https://arweave.net/${carTemplate.name
-                  .toLowerCase()
-                  .replace(/\s+/g, "-")}.json`,
-            };
-          } else if (wrappingEnabled) {
-            // OFFICIAL SOLUTION: Use wrapping method with wrapped character model
-            console.log(
-              "🔄 OFFICIAL WRAPPING METHOD - using wrapped character model..."
-            );
-
-            // Load wrapped config
-            const wrappedConfig = JSON.parse(
-              localStorage.getItem("honeycomb_wrapped_config") || "{}"
-            );
-            const wrappedCharacterModel = wrappedConfig.wrappedCharacterModel;
-
-            if (!wrappedCharacterModel) {
-              throw new Error(
-                "❌ Wrapped character model not found!\n\n" +
-                  "🔧 SOLUTION: Admin must run enablePublicMinting() first:\n" +
-                  "window.nftCarService.enablePublicMinting(adminWallet)\n\n" +
-                  "This will create the wrapped character model needed for public minting."
-              );
-            }
-
-            console.log(
-              "🎯 Using wrapped character model:",
-              wrappedCharacterModel
-            );
-
-            // Use wrapping method from official docs
-            transactionParams = {
-              project: this.projectAddress,
-              characterModel: wrappedCharacterModel, // Use wrapped model
-              owner: wallet.publicKey.toString(), // User owns the character
-              authority: wallet.publicKey.toString(), // User has authority over their character
-              wallet: wallet.publicKey.toString(), // For backward compatibility
-              mintList: [], // Empty - we're creating new characters, not wrapping existing NFTs
-              // Note: No assemblerConfig needed for wrapping method
-            };
-
-            console.log(
-              "✨ Using official Honeycomb wrapping method for public minting"
-            );
-          } else {
-            // Neither method enabled - provide setup instructions
-            throw new Error(
-              "❌ PUBLIC MINTING NOT ENABLED\n\n" +
-                "🔧 CHOOSE A SOLUTION:\n\n" +
-                "📋 Option 1 - IMMEDIATE (Browser Console):\n" +
-                "window.nftCarService.enableImmediatePublicMinting()\n\n" +
-                "📋 Option 2 - OFFICIAL WRAPPING (Admin Wallet Required):\n" +
-                "window.nftCarService.enablePublicMinting(adminWallet)\n\n" +
-                "Current user: " +
-                wallet.publicKey.toString() +
-                "\n" +
-                "Project admin: " +
-                projectAuthority
-            );
-          }
-        }
+        const transactionParams = {
+          uri: carTemplate.image, // Uri of the image representing your character
+          project: this.projectAddress, // Project public key as a string
+          assemblerConfig: assemblerConfigAddr, // Assembler config public key as a string
+          characterModel: characterModelAddr, // Character model public key as a string
+          wallet: wallet.publicKey.toString(), // User wallet public key as a string, this user will receive the character
+          owner: wallet.publicKey.toString(), // User owns the character
+          authority: projectAuthority, // Project authority for minting permissions
+          payer: wallet.publicKey.toString(), // User pays for the transaction
+        };
 
         // Check assembler config permissions
         try {
@@ -1055,9 +986,12 @@ class NFTCarService {
             console.log("   Order:", config.order);
             console.log("   Ticker:", config.ticker);
             console.log("   Full config:", config);
-            
+
             // Check if authority matches project authority
-            console.log("🔍 Authority matches projectAuthority?", config.authority === projectAuthority);
+            console.log(
+              "🔍 Authority matches projectAuthority?",
+              config.authority === projectAuthority
+            );
             console.log("🔍 Current projectAuthority:", projectAuthority);
           }
 
@@ -1192,55 +1126,24 @@ class NFTCarService {
           );
         }
 
-        console.log("📋 FINAL Transaction parameters:", {
+        console.log("📋 Transaction parameters:", {
           userWallet: wallet.publicKey.toString(),
-          projectAuthority,
-          isUserAdmin,
-          allowAllUsers:
-            localStorage.getItem("allow_all_users_mint") === "true",
-          wrappingEnabled:
-            localStorage.getItem("wrapping_mode_enabled") === "true",
-          transactionParams: transactionParams,
+          transactionParams,
           assemblerConfig: assemblerConfigAddr,
           characterModel: characterModelAddr,
         });
 
-        // Use different transaction methods based on user type and enabled methods
-        const allowAllUsers =
-          localStorage.getItem("allow_all_users_mint") === "true";
-        const wrappingEnabled =
-          localStorage.getItem("wrapping_mode_enabled") === "true";
-
-        if (isUserAdmin || allowAllUsers) {
-          // Admin users OR immediate public minting enabled: Use assembly method
-          console.log(
-            isUserAdmin ? "🔄 Admin user" : "🚀 Immediate public minting",
-            "- using assembly method..."
+        // Use standard Honeycomb character assembly for all users
+        console.log("🔄 Creating character assembly transaction...");
+        transactionResponse =
+          await this.client.createAssembleCharacterTransaction(
+            transactionParams,
+            {
+              fetchOptions: {
+                headers: { authorization: `Bearer ${accessToken}` },
+              },
+            }
           );
-          transactionResponse =
-            await this.client.createAssembleCharacterTransaction(
-              transactionParams,
-              {
-                fetchOptions: {
-                  headers: { authorization: `Bearer ${accessToken}` },
-                },
-              }
-            );
-        } else if (wrappingEnabled) {
-          // Non-admin users with wrapping enabled: Use official wrapping method
-          console.log("🔄 Non-admin user - using official wrapping method...");
-          transactionResponse =
-            await this.client.createWrapAssetsToCharacterTransactions(
-              transactionParams,
-              {
-                fetchOptions: {
-                  headers: { authorization: `Bearer ${accessToken}` },
-                },
-              }
-            );
-        } else {
-          throw new Error("No public minting method enabled");
-        }
         console.log(
           "✅ Transaction created successfully:",
           transactionResponse
@@ -1266,43 +1169,46 @@ class NFTCarService {
         );
         console.error("❌ Error details:", {
           userWallet: wallet.publicKey.toString(),
-          projectAuthority,
-          isAdmin: wallet.publicKey.toString() === projectAuthority,
-          usedOwner: transactionParams?.owner,
-          usedWallet: transactionParams?.wallet,
-          usedAuthority: transactionParams?.authority,
+          transactionParams,
           errorMessage: createError.message,
         });
 
-        // Provide specific guidance for non-admin minting issues
-        if (wallet.publicKey.toString() !== projectAuthority) {
-          if (
-            createError.message.includes("Invalid authority") ||
-            createError.message.includes("signature verification")
-          ) {
+        // Check if it's an authority restriction error
+        if (createError.message?.includes("Invalid authority")) {
+          console.log(
+            "🔧 Detected authority restriction - trying with project authority..."
+          );
+
+          // Retry with project authority
+          const retryParams = {
+            ...transactionParams,
+            authority: projectAuthority, // Use project authority instead
+          };
+
+          try {
+            console.log(
+              "🔄 Retrying transaction with project authority as authority..."
+            );
+            transactionResponse =
+              await this.client.createAssembleCharacterTransaction(
+                retryParams,
+                {
+                  fetchOptions: {
+                    headers: { authorization: `Bearer ${accessToken}` },
+                  },
+                }
+              );
+            console.log("✅ Retry successful with project authority");
+          } catch (retryError: any) {
             throw new Error(
-              "❌ CONFIRMED: Assembler config restricts non-admin minting\n\n" +
-                "🔧 SOLUTION: Admin must update assembler config to allow public minting\n\n" +
-                "Current assembler config: " +
-                assemblerConfigAddr +
-                "\n" +
-                "Project authority: " +
-                projectAuthority +
-                "\n\n" +
-                "📋 Steps for admin:\n" +
-                "1. Connect with admin wallet: " +
-                projectAuthority +
-                "\n" +
-                "2. Update assembler config permissions to allow any user with profile\n" +
-                "3. Or create a separate public assembler config\n\n" +
-                "📖 Docs: https://docs.honeycombprotocol.com/characters/assembling-characters\n" +
-                "💬 Discord: Contact Honeycomb team for assembler permission settings\n\n" +
-                `Technical error: ${createError.message}`
+              `Transaction failed even with project authority: ${retryError.message}`
             );
           }
+        } else {
+          throw new Error(
+            `Transaction creation failed: ${createError.message}`
+          );
         }
-
-        throw new Error(`Transaction creation failed: ${createError.message}`);
       }
 
       // Check if the transaction response is valid
@@ -1317,6 +1223,10 @@ class NFTCarService {
       if (transactionResponse.createAssembleCharacterTransaction) {
         actualTransaction =
           transactionResponse.createAssembleCharacterTransaction;
+      } else if (transactionResponse.createWrapAssetsToCharacterTransactions) {
+        // Handle wrapping transaction response format
+        actualTransaction =
+          transactionResponse.createWrapAssetsToCharacterTransactions;
       } else if (transactionResponse.transaction) {
         actualTransaction = transactionResponse.transaction;
       } else if (Array.isArray(transactionResponse)) {
@@ -1982,7 +1892,7 @@ class NFTCarService {
     try {
       const accessToken = await getOrCreateAccessToken(
         wallet.publicKey.toString(),
-        wallet.signMessage?.bind(wallet) || wallet.adapter.signMessage?.bind(wallet.adapter) || wallet.adapter.signMessage
+        this.getSignMessageFunction(wallet)
       );
 
       const stakingPoolTransaction =
@@ -2043,7 +1953,7 @@ class NFTCarService {
     try {
       const accessToken = await getOrCreateAccessToken(
         wallet.publicKey.toString(),
-        wallet.signMessage?.bind(wallet) || wallet.adapter.signMessage?.bind(wallet.adapter) || wallet.adapter.signMessage
+        this.getSignMessageFunction(wallet)
       );
 
       // Ensure user has a profile before staking
@@ -2112,7 +2022,7 @@ class NFTCarService {
     try {
       const accessToken = await getOrCreateAccessToken(
         wallet.publicKey.toString(),
-        wallet.signMessage?.bind(wallet) || wallet.adapter.signMessage?.bind(wallet.adapter) || wallet.adapter.signMessage
+        this.getSignMessageFunction(wallet)
       );
 
       const poolAddress =
@@ -2173,7 +2083,7 @@ class NFTCarService {
     try {
       const accessToken = await getOrCreateAccessToken(
         wallet.publicKey.toString(),
-        wallet.signMessage?.bind(wallet) || wallet.adapter.signMessage?.bind(wallet.adapter) || wallet.adapter.signMessage
+        this.getSignMessageFunction(wallet)
       );
 
       const poolAddress =

@@ -96,19 +96,21 @@ export const CarMinting: React.FC = () => {
     setError(null);
 
     try {
+      // Use the actual wallet object instead of creating a custom one
       const walletForMinting = {
         publicKey,
-        signMessage: wallet?.adapter?.signMessage,
         signTransaction,
         signAllTransactions,
-        adapter: wallet?.adapter
+        adapter: wallet?.adapter,
+        // Pass the original wallet for signMessage to maintain proper context
+        originalWallet: wallet
       };
 
       if (!walletForMinting.signTransaction) {
         throw new Error('Wallet must support transaction signing to mint NFT cars');
       }
 
-      if (!walletForMinting.signMessage && !walletForMinting.adapter?.signMessage) {
+      if (!wallet?.adapter?.signMessage) {
         throw new Error('Wallet must support message signing for authentication');
       }
 
@@ -400,21 +402,20 @@ export const CarMinting: React.FC = () => {
         </div>
         <button
           onClick={randomMint}
-          disabled={Object.values(mintingStates).some(state => state) || !connected || !publicMintingEnabled}
+          disabled={Object.values(mintingStates).some(state => state) || !connected}
           style={{
             background: 'rgba(255, 255, 255, 0.2)',
             border: '2px solid white',
             color: 'white',
             padding: '12px 30px',
             borderRadius: '8px',
-            cursor: connected && !Object.values(mintingStates).some(state => state) && publicMintingEnabled ? 'pointer' : 'not-allowed',
+            cursor: connected && !Object.values(mintingStates).some(state => state) ? 'pointer' : 'not-allowed',
             fontWeight: 'bold',
             fontSize: '16px'
           }}
         >
           {Object.values(mintingStates).some(state => state) ? '🎲 Rolling...' : 
            !connected ? '🔌 Connect Wallet' :
-           !publicMintingEnabled ? '🔒 Enable Public Minting' :
            '🎲 Random Mint (FREE + Gas)'}
         </button>
       </div>
@@ -430,8 +431,7 @@ export const CarMinting: React.FC = () => {
           const isCurrentlyMinting = mintingStates[carType.id] || false;
           const canMint = connected && publicKey && 
                          carType.currentSupply < carType.maxSupply && 
-                         !isCurrentlyMinting &&
-                         publicMintingEnabled; // Now requires public minting to be enabled
+                         !isCurrentlyMinting; // Any connected user can mint
           const isSoldOut = carType.currentSupply >= carType.maxSupply;
           const supplyPercentage = (carType.currentSupply / carType.maxSupply) * 100;
 
@@ -578,7 +578,6 @@ export const CarMinting: React.FC = () => {
                 {isCurrentlyMinting ? '🔄 Minting...' :
                  isSoldOut ? '❌ Sold Out' :
                  !connected ? '🔌 Connect Wallet' :
-                 !publicMintingEnabled ? '🔒 Public Minting Disabled' :
                  `🎯 Mint ${carType.name} (FREE)`}
               </button>
             </div>

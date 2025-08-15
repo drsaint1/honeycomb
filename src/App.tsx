@@ -1,9 +1,9 @@
 // App.tsx - COMPREHENSIVE HONEYCOMB RACING GAME
-import React, { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import WalletIntegration from "./components/WalletIntegration";
 import HoneycombCarGame from "./components/HoneycombCarGame";
 import ProjectCreator from "./components/ProjectCreator";
-import HoneycombSetup from "./components/HoneycombSetup";
+
 import DailyChallenges from "./components/DailyChallenges";
 import TournamentSystem from "./components/TournamentSystem";
 import CarStaking from "./components/CarStaking";
@@ -22,17 +22,25 @@ import {
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import "@solana/wallet-adapter-react-ui/styles.css";
 
-type ViewType = 'menu' | 'game' | 'project' | 'setup' | 'challenges' | 'tournaments' | 'staking' | 'minting' | 'car-selection';
+type ViewType =
+  | "menu"
+  | "game"
+  | "project"
+  | "setup"
+  | "challenges"
+  | "tournaments"
+  | "staking"
+  | "minting"
+  | "car-selection";
 
 function App() {
-  const [currentView, setCurrentView] = useState<ViewType>('menu');
+  const [currentView, setCurrentView] = useState<ViewType>("menu");
   const [walletConnected, setWalletConnected] = useState(false);
 
   const wallets = useMemo(
     () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
     []
   );
-
 
   // Use test network endpoint
   const endpoint = "https://rpc.test.honeycombprotocol.com";
@@ -54,15 +62,15 @@ function App() {
       alert(
         "⚠️ No Honeycomb project found!\n\nPlease create a project first using the Project Creator."
       );
-      setCurrentView('project');
+      setCurrentView("project");
       return;
     }
 
-    setCurrentView('game');
+    setCurrentView("game");
   };
 
   const navigateToView = (view: ViewType) => {
-    if (view !== 'menu' && view !== 'project' && !walletConnected) {
+    if (view !== "menu" && view !== "project" && !walletConnected) {
       alert("Please connect your wallet first!");
       return;
     }
@@ -70,20 +78,22 @@ function App() {
   };
 
   const renderNavigationHeader = () => (
-    <div style={{
-      position: 'absolute',
-      top: '20px',
-      left: '20px',
-      right: '20px',
-      zIndex: 1000,
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    }}>
+    <div
+      style={{
+        position: "absolute",
+        top: "20px",
+        left: "20px",
+        right: "20px",
+        zIndex: 1000,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
       <div>
-        {currentView !== 'menu' && (
+        {currentView !== "menu" && (
           <button
-            onClick={() => navigateToView('menu')}
+            onClick={() => navigateToView("menu")}
             style={{
               background: "rgba(0,0,0,0.8)",
               border: "2px solid #ffd700",
@@ -107,42 +117,46 @@ function App() {
           </button>
         )}
       </div>
-      
+
       {/* Project Status Indicator */}
-      <div style={{
-        background: import.meta.env.VITE_PUBLIC_HONEYCOMB_PROJECT_ADDRESS ? 
-          'rgba(40, 167, 69, 0.8)' : 'rgba(220, 53, 69, 0.8)',
-        color: 'white',
-        padding: '6px 12px',
-        borderRadius: '12px',
-        fontSize: '12px',
-        fontWeight: 'bold'
-      }}>
-        {import.meta.env.VITE_PUBLIC_HONEYCOMB_PROJECT_ADDRESS ? 
-          '✅ Project Setup' : '⚠️ Setup Required'}
+      <div
+        style={{
+          background: import.meta.env.VITE_PUBLIC_HONEYCOMB_PROJECT_ADDRESS
+            ? "rgba(40, 167, 69, 0.8)"
+            : "rgba(220, 53, 69, 0.8)",
+          color: "white",
+          padding: "6px 12px",
+          borderRadius: "12px",
+          fontSize: "12px",
+          fontWeight: "bold",
+        }}
+      >
+        {import.meta.env.VITE_PUBLIC_HONEYCOMB_PROJECT_ADDRESS
+          ? "✅ Project Setup"
+          : "⚠️ Setup Required"}
       </div>
     </div>
   );
 
   const renderContent = () => {
     switch (currentView) {
-      case 'game':
+      case "game":
         return <HoneycombCarGame />;
-      case 'project':
+      case "project":
         return <ProjectCreator />;
-      case 'setup':
-        return <HoneycombSetup />;
-      case 'challenges':
+      case "setup":
+        return <ProjectCreator />;
+      case "challenges":
         return <DailyChallenges />;
-      case 'tournaments':
+      case "tournaments":
         return <TournamentSystem />;
-      case 'staking':
+      case "staking":
         return <CarStaking />;
-      case 'minting':
+      case "minting":
         return <CarMinting />;
-      case 'car-selection':
+      case "car-selection":
         return <CarSelectionPage />;
-      case 'menu':
+      case "menu":
       default:
         return renderMainMenu();
     }
@@ -182,80 +196,91 @@ function App() {
         </p>
 
         {/* Feature Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '20px',
-          margin: '30px 0'
-        }}>
-          <div style={{
-            background: 'rgba(255, 215, 0, 0.1)',
-            padding: '20px',
-            borderRadius: '12px',
-            border: '1px solid rgba(255, 215, 0, 0.3)'
-          }}>
-            <h3 style={{ color: '#ffd700', margin: '0 0 10px 0' }}>🏁 Racing Game</h3>
-            <p style={{ fontSize: '14px', margin: 0 }}>
-              High-speed racing with NFT car selection, blockchain achievements and permanent progression
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: "20px",
+            margin: "30px 0",
+          }}
+        >
+          <div
+            style={{
+              background: "rgba(255, 215, 0, 0.1)",
+              padding: "20px",
+              borderRadius: "12px",
+              border: "1px solid rgba(255, 215, 0, 0.3)",
+            }}
+          >
+            <h3 style={{ color: "#ffd700", margin: "0 0 10px 0" }}>
+              🏁 Racing Game
+            </h3>
+            <p style={{ fontSize: "14px", margin: 0 }}>
+              High-speed racing with NFT car selection, blockchain achievements
+              and permanent progression
             </p>
             <button
               onClick={startGame}
               disabled={!walletConnected}
               style={{
-                width: '100%',
-                background: walletConnected ? '#28a745' : '#6c757d',
-                color: 'white',
-                border: 'none',
-                padding: '10px',
-                borderRadius: '6px',
-                cursor: walletConnected ? 'pointer' : 'not-allowed',
-                marginTop: '10px',
-                fontWeight: 'bold'
+                width: "100%",
+                background: walletConnected ? "#28a745" : "#6c757d",
+                color: "white",
+                border: "none",
+                padding: "10px",
+                borderRadius: "6px",
+                cursor: walletConnected ? "pointer" : "not-allowed",
+                marginTop: "10px",
+                fontWeight: "bold",
               }}
             >
               🏁 Start Racing
             </button>
           </div>
 
-          <div style={{
-            background: 'rgba(255, 107, 53, 0.1)',
-            padding: '20px',
-            borderRadius: '12px',
-            border: '1px solid rgba(255, 107, 53, 0.3)'
-          }}>
-            <h3 style={{ color: '#ff6b35', margin: '0 0 10px 0' }}>🏎️ NFT Cars</h3>
-            <p style={{ fontSize: '14px', margin: 0 }}>
+          <div
+            style={{
+              background: "rgba(255, 107, 53, 0.1)",
+              padding: "20px",
+              borderRadius: "12px",
+              border: "1px solid rgba(255, 107, 53, 0.3)",
+            }}
+          >
+            <h3 style={{ color: "#ff6b35", margin: "0 0 10px 0" }}>
+              🏎️ NFT Cars
+            </h3>
+            <p style={{ fontSize: "14px", margin: 0 }}>
               Mint, collect, and stake racing cars to earn SPEEDY token rewards
             </p>
-            <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+            <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
               <button
-                onClick={() => navigateToView('minting')}
+                onClick={() => navigateToView("minting")}
                 style={{
                   flex: 1,
-                  background: '#ff6b35',
-                  color: 'white',
-                  border: 'none',
-                  padding: '10px',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  fontSize: '12px'
+                  background: "#ff6b35",
+                  color: "white",
+                  border: "none",
+                  padding: "10px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  fontSize: "12px",
                 }}
               >
                 🎯 Mint
               </button>
               <button
-                onClick={() => navigateToView('car-selection')}
+                onClick={() => navigateToView("car-selection")}
                 style={{
                   flex: 1,
-                  background: '#007bff',
-                  color: 'white',
-                  border: 'none',
-                  padding: '10px',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  fontSize: '12px'
+                  background: "#007bff",
+                  color: "white",
+                  border: "none",
+                  padding: "10px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  fontSize: "12px",
                 }}
               >
                 🏎️ Select
@@ -263,112 +288,131 @@ function App() {
             </div>
           </div>
 
-          <div style={{
-            background: 'rgba(40, 167, 69, 0.1)',
-            padding: '20px',
-            borderRadius: '12px',
-            border: '1px solid rgba(40, 167, 69, 0.3)'
-          }}>
-            <h3 style={{ color: '#28a745', margin: '0 0 10px 0' }}>🎯 Car Staking</h3>
-            <p style={{ fontSize: '14px', margin: 0 }}>
+          <div
+            style={{
+              background: "rgba(40, 167, 69, 0.1)",
+              padding: "20px",
+              borderRadius: "12px",
+              border: "1px solid rgba(40, 167, 69, 0.3)",
+            }}
+          >
+            <h3 style={{ color: "#28a745", margin: "0 0 10px 0" }}>
+              🎯 Car Staking
+            </h3>
+            <p style={{ fontSize: "14px", margin: 0 }}>
               Stake your NFT cars to earn passive SPEEDY token rewards over time
             </p>
             <button
-              onClick={() => navigateToView('staking')}
+              onClick={() => navigateToView("staking")}
               style={{
-                width: '100%',
-                background: '#28a745',
-                color: 'white',
-                border: 'none',
-                padding: '10px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                marginTop: '10px',
-                fontWeight: 'bold'
+                width: "100%",
+                background: "#28a745",
+                color: "white",
+                border: "none",
+                padding: "10px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                marginTop: "10px",
+                fontWeight: "bold",
               }}
             >
               💰 Stake Cars
             </button>
           </div>
 
-          <div style={{
-            background: 'rgba(23, 162, 184, 0.1)',
-            padding: '20px',
-            borderRadius: '12px',
-            border: '1px solid rgba(23, 162, 184, 0.3)'
-          }}>
-            <h3 style={{ color: '#17a2b8', margin: '0 0 10px 0' }}>📅 Daily Challenges</h3>
-            <p style={{ fontSize: '14px', margin: 0 }}>
-              Complete daily challenges to earn SPEEDY tokens and unlock achievements
+          <div
+            style={{
+              background: "rgba(23, 162, 184, 0.1)",
+              padding: "20px",
+              borderRadius: "12px",
+              border: "1px solid rgba(23, 162, 184, 0.3)",
+            }}
+          >
+            <h3 style={{ color: "#17a2b8", margin: "0 0 10px 0" }}>
+              📅 Daily Challenges
+            </h3>
+            <p style={{ fontSize: "14px", margin: 0 }}>
+              Complete daily challenges to earn SPEEDY tokens and unlock
+              achievements
             </p>
             <button
-              onClick={() => navigateToView('challenges')}
+              onClick={() => navigateToView("challenges")}
               style={{
-                width: '100%',
-                background: '#17a2b8',
-                color: 'white',
-                border: 'none',
-                padding: '10px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                marginTop: '10px',
-                fontWeight: 'bold'
+                width: "100%",
+                background: "#17a2b8",
+                color: "white",
+                border: "none",
+                padding: "10px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                marginTop: "10px",
+                fontWeight: "bold",
               }}
             >
               🎯 View Challenges
             </button>
           </div>
 
-          <div style={{
-            background: 'rgba(102, 16, 242, 0.1)',
-            padding: '20px',
-            borderRadius: '12px',
-            border: '1px solid rgba(102, 16, 242, 0.3)'
-          }}>
-            <h3 style={{ color: '#6610f2', margin: '0 0 10px 0' }}>🏆 Tournaments</h3>
-            <p style={{ fontSize: '14px', margin: 0 }}>
-              Compete in tournaments with entry fees and win massive SPEEDY prizes
+          <div
+            style={{
+              background: "rgba(102, 16, 242, 0.1)",
+              padding: "20px",
+              borderRadius: "12px",
+              border: "1px solid rgba(102, 16, 242, 0.3)",
+            }}
+          >
+            <h3 style={{ color: "#6610f2", margin: "0 0 10px 0" }}>
+              🏆 Tournaments
+            </h3>
+            <p style={{ fontSize: "14px", margin: 0 }}>
+              Compete in tournaments with entry fees and win massive SPEEDY
+              prizes
             </p>
             <button
-              onClick={() => navigateToView('tournaments')}
+              onClick={() => navigateToView("tournaments")}
               style={{
-                width: '100%',
-                background: '#6610f2',
-                color: 'white',
-                border: 'none',
-                padding: '10px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                marginTop: '10px',
-                fontWeight: 'bold'
+                width: "100%",
+                background: "#6610f2",
+                color: "white",
+                border: "none",
+                padding: "10px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                marginTop: "10px",
+                fontWeight: "bold",
               }}
             >
               🏅 Join Tournaments
             </button>
           </div>
 
-          <div style={{
-            background: 'rgba(253, 126, 20, 0.1)',
-            padding: '20px',
-            borderRadius: '12px',
-            border: '1px solid rgba(253, 126, 20, 0.3)'
-          }}>
-            <h3 style={{ color: '#fd7e14', margin: '0 0 10px 0' }}>🛠️ Project Setup</h3>
-            <p style={{ fontSize: '14px', margin: 0 }}>
-              Create and manage your Honeycomb project with full blockchain integration
+          <div
+            style={{
+              background: "rgba(253, 126, 20, 0.1)",
+              padding: "20px",
+              borderRadius: "12px",
+              border: "1px solid rgba(253, 126, 20, 0.3)",
+            }}
+          >
+            <h3 style={{ color: "#fd7e14", margin: "0 0 10px 0" }}>
+              🛠️ Project Setup
+            </h3>
+            <p style={{ fontSize: "14px", margin: 0 }}>
+              Create and manage your Honeycomb project with full blockchain
+              integration
             </p>
             <button
-              onClick={() => navigateToView('project')}
+              onClick={() => navigateToView("project")}
               style={{
-                width: '100%',
-                background: '#fd7e14',
-                color: 'white',
-                border: 'none',
-                padding: '10px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                marginTop: '10px',
-                fontWeight: 'bold'
+                width: "100%",
+                background: "#fd7e14",
+                color: "white",
+                border: "none",
+                padding: "10px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                marginTop: "10px",
+                fontWeight: "bold",
               }}
             >
               ⚙️ Manage Project
@@ -376,28 +420,32 @@ function App() {
           </div>
 
           {/* Honeycomb Official Setup */}
-          <div style={{
-            background: 'rgba(0, 123, 255, 0.1)',
-            padding: '20px',
-            borderRadius: '12px',
-            border: '2px solid #007bff'
-          }}>
-            <h3 style={{ color: '#007bff', margin: '0 0 10px 0' }}>🏗️ Honeycomb Setup</h3>
-            <p style={{ fontSize: '14px', margin: 0 }}>
+          <div
+            style={{
+              background: "rgba(0, 123, 255, 0.1)",
+              padding: "20px",
+              borderRadius: "12px",
+              border: "2px solid #007bff",
+            }}
+          >
+            <h3 style={{ color: "#007bff", margin: "0 0 10px 0" }}>
+              🏗️ Honeycomb Setup
+            </h3>
+            <p style={{ fontSize: "14px", margin: 0 }}>
               Run the official 4-step Honeycomb character assembly setup process
             </p>
             <button
-              onClick={() => navigateToView('setup')}
+              onClick={() => navigateToView("setup")}
               style={{
-                width: '100%',
-                background: '#007bff',
-                color: 'white',
-                border: 'none',
-                padding: '10px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                marginTop: '10px',
-                fontWeight: 'bold'
+                width: "100%",
+                background: "#007bff",
+                color: "white",
+                border: "none",
+                padding: "10px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                marginTop: "10px",
+                fontWeight: "bold",
               }}
             >
               🚀 Official Setup
@@ -418,7 +466,8 @@ function App() {
               border: "1px solid #ffaa00",
             }}
           >
-            ⚠️ <strong>Setup Required:</strong> Create your Honeycomb project first to enable all blockchain features
+            ⚠️ <strong>Setup Required:</strong> Create your Honeycomb project
+            first to enable all blockchain features
           </div>
         )}
 
@@ -437,21 +486,28 @@ function App() {
           </div>
         )}
 
-        <div style={{
-          marginTop: "20px",
-          fontSize: "14px",
-          opacity: 0.8,
-          background: "rgba(255,215,0,0.1)",
-          padding: "15px",
-          borderRadius: "10px",
-        }}>
-          <strong>🎮 Complete Racing Ecosystem:</strong><br />
-          • 🏁 High-speed racing with NFT car selection and blockchain rewards<br />
-          • 🏎️ NFT car collection with 3 unique designs and gameplay bonuses<br />
-          • 💰 SPEEDY token economy with staking rewards<br />
-          • 📅 Daily challenges and achievement system<br />
-          • 🏆 Competitive tournaments with prize pools<br />
-          • 🔗 Permanent on-chain progression via Honeycomb Protocol
+        <div
+          style={{
+            marginTop: "20px",
+            fontSize: "14px",
+            opacity: 0.8,
+            background: "rgba(255,215,0,0.1)",
+            padding: "15px",
+            borderRadius: "10px",
+          }}
+        >
+          <strong>🎮 Complete Racing Ecosystem:</strong>
+          <br />
+          • 🏁 High-speed racing with NFT car selection and blockchain rewards
+          <br />
+          • 🏎️ NFT car collection with 3 unique designs and gameplay bonuses
+          <br />
+          • 💰 SPEEDY token economy with staking rewards
+          <br />
+          • 📅 Daily challenges and achievement system
+          <br />
+          • 🏆 Competitive tournaments with prize pools
+          <br />• 🔗 Permanent on-chain progression via Honeycomb Protocol
         </div>
       </div>
 
@@ -481,7 +537,9 @@ function App() {
               transform: `rotate(${Math.random() * 360}deg)`,
               clipPath:
                 "polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%)",
-              animation: `float ${3 + Math.random() * 4}s ease-in-out infinite ${Math.random() * 2}s`,
+              animation: `float ${
+                3 + Math.random() * 4
+              }s ease-in-out infinite ${Math.random() * 2}s`,
             }}
           />
         ))}
@@ -509,28 +567,34 @@ function App() {
                 position: "fixed",
                 top: 0,
                 left: 0,
-                overflow: currentView === 'menu' || currentView === 'game' ? "hidden" : "auto",
+                overflow:
+                  currentView === "menu" || currentView === "game"
+                    ? "hidden"
+                    : "auto",
                 color: "white",
                 fontFamily: "Arial, sans-serif",
               }}
             >
               {renderNavigationHeader()}
-              
-              <div style={{
-                width: "100%",
-                height: "100%",
-                overflow: currentView === 'menu' || currentView === 'game' ? "hidden" : "auto",
-                position: "relative",
-              }}>
-                <ErrorBoundary>
-                  {renderContent()}
-                </ErrorBoundary>
+
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  overflow:
+                    currentView === "menu" || currentView === "game"
+                      ? "hidden"
+                      : "auto",
+                  position: "relative",
+                }}
+              >
+                <ErrorBoundary>{renderContent()}</ErrorBoundary>
               </div>
 
               {/* Wallet Integration with proper props */}
               <WalletIntegration
                 onConnect={handleWalletConnect}
-                gameStarted={currentView === 'game'}
+                gameStarted={currentView === "game"}
               />
             </div>
           </WalletModalProvider>

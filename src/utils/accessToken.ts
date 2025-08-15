@@ -43,33 +43,46 @@ export const getHoneycombAccessToken = async (
         throw new Error("signMessage is not a function. Received: " + typeof signMessage);
       }
       
-      // Try to call signMessage directly, but catch the 'emit' error and handle it
-      try {
-        signedResult = await signMessage(encodedMessage);
-      } catch (emitError: any) {
-        if (emitError?.message?.includes("Cannot read properties of undefined (reading 'emit')")) {
-          // The wallet adapter is missing the emit method, let's try binding it
-          console.log("🔧 Wallet adapter missing emit method, trying alternative approach...");
-          
-          // Create a dummy emit function if needed
-          if (signMessage.bind && typeof signMessage === 'object') {
-            const boundSignMessage = signMessage.bind({ emit: () => {} });
-            signedResult = await boundSignMessage(encodedMessage);
-          } else {
-            // Try calling with .call to provide a context with emit
-            signedResult = await signMessage.call({ emit: () => {} }, encodedMessage);
-          }
-        } else {
-          throw emitError;
-        }
-      }
+      // Call signMessage - it should be properly bound from the caller
+      signedResult = await signMessage(encodedMessage);
       
       console.log("✅ Wallet signing completed");
-    } catch (signingError) {
+    } catch (signingError: any) {
       console.error("❌ Wallet signing failed:", signingError);
-      console.error("❌ signMessage type:", typeof signMessage);
-      console.error("❌ signMessage value:", signMessage);
-      throw new Error("Failed to sign message with wallet: " + (signingError as Error).message);
+      
+      // Check if it's the specific "emit is not a function" error
+      if (signingError.message?.includes('emit is not a function')) {
+        console.log("🔧 Detected 'emit is not a function' error - wallet adapter needs EventEmitter context");
+        
+        // Try to provide a minimal EventEmitter-like context
+        try {
+          console.log("🔧 Attempting to call signMessage with EventEmitter context...");
+          
+          // Create a minimal EventEmitter-like object
+          const emitterContext = {
+            emit: () => {},
+            on: () => {},
+            off: () => {},
+            removeListener: () => {},
+            addListener: () => {},
+          };
+          
+          // Try to call with proper context
+          if (signMessage.call) {
+            signedResult = await signMessage.call(emitterContext, encodedMessage);
+            console.log("✅ Wallet signing succeeded with EventEmitter context");
+          } else {
+            throw new Error("Cannot provide EventEmitter context - function doesn't support .call()");
+          }
+        } catch (contextError) {
+          console.error("❌ Failed even with EventEmitter context:", contextError);
+          throw new Error("Wallet adapter requires EventEmitter but it's not available. Please try a different wallet or refresh the page.");
+        }
+      } else {
+        console.error("❌ signMessage type:", typeof signMessage);
+        console.error("❌ signMessage value:", signMessage);
+        throw new Error("Failed to sign message with wallet: " + signingError.message);
+      }
     }
     
     if (signedResult === undefined || signedResult === null) {

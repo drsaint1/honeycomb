@@ -1,4 +1,4 @@
-{
+[{
   "name": "Titan Cruiser",
   "symbol": "CAR",
   "description": "A bulky car with massive control but slower acceleration.",
@@ -22,9 +22,7 @@
       }
     ]
   }
-}, 
-
-
+},
 {
   "name": "Drift Master",
   "symbol": "CAR",
@@ -49,7 +47,7 @@
       }
     ]
   }
-}
+},
 {
   "name": "Nitro Runner",
   "symbol": "CAR",
@@ -75,3 +73,4 @@
     ]
   }
 }
+]
