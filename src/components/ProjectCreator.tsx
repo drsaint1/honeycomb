@@ -96,8 +96,8 @@ export const ProjectCreator: React.FC = () => {
         connected: true,
       };
 
-      // Extract the actual transaction from the response (same issue as NFT infrastructure)
-      const actualTransaction = projectResponse.tx || projectResponse;
+      // Extract the actual transaction from the response
+      const actualTransaction = 'tx' in projectResponse ? projectResponse.tx : projectResponse;
 
       // Send project creation transaction
       const projectSignatures = await sendClientTransactions(
@@ -162,8 +162,8 @@ export const ProjectCreator: React.FC = () => {
         connected: true,
       };
 
-      // Extract the actual transaction from the response (same fix as project creation)
-      const actualTreeTransaction = treeResponse.tx || treeResponse;
+      // Extract the actual transaction from the response
+      const actualTreeTransaction = 'tx' in treeResponse ? treeResponse.tx : treeResponse;
 
       const treeSignatures = await sendClientTransactions(
         client,
@@ -582,8 +582,7 @@ export const ProjectCreator: React.FC = () => {
 
                     if (configs.length > 0) {
                       const latestAssembler = configs[configs.length - 1];
-                      assemblerAddr =
-                        latestAssembler.address || latestAssembler.id;
+                      assemblerAddr = latestAssembler.address;
                       setAssemblerConfigAddress(assemblerAddr);
                       console.log(
                         "✅ Found assembler config via query:",
@@ -692,20 +691,15 @@ export const ProjectCreator: React.FC = () => {
       }
 
       // Extract the actual transaction like we did for assembler config
-      let finalModelTransaction = modelTransaction;
-      if (
-        modelTransaction &&
-        typeof modelTransaction === "object" &&
-        "tx" in modelTransaction
-      ) {
-        finalModelTransaction = modelTransaction.tx;
-        console.log("🔍 Using tx property from model transaction object");
-      }
+      const finalModelTransaction = 
+        modelTransaction && typeof modelTransaction === "object" && "tx" in modelTransaction
+          ? modelTransaction.tx
+          : modelTransaction;
 
       const modelSignatures = await sendClientTransactions(
         client,
         walletWrapper,
-        finalModelTransaction
+        finalModelTransaction as any
       );
 
       let modelAddr;
@@ -779,7 +773,7 @@ export const ProjectCreator: React.FC = () => {
               actualCharacterModels.characterModel[
                 actualCharacterModels.characterModel.length - 1
               ];
-            modelAddr = latestModel.address || latestModel.id;
+            modelAddr = latestModel.address || (latestModel as any).id;
             setCharacterModelAddress(modelAddr);
             console.log("✅ Found actual character model address:", modelAddr);
           } else {
@@ -790,7 +784,7 @@ export const ProjectCreator: React.FC = () => {
 
           // Try using original response data
           modelAddr =
-            modelTransaction?.characterModel ||
+            (modelTransaction as any)?.characterModel ||
             modelResponse?.createCreateCharacterModelTransaction
               ?.characterModel;
 
@@ -808,7 +802,7 @@ export const ProjectCreator: React.FC = () => {
               if (anyModels?.characterModel?.length > 0) {
                 modelAddr =
                   anyModels.characterModel[0].address ||
-                  anyModels.characterModel[0].id;
+                  (anyModels.characterModel[0] as any).id;
                 console.log("🔍 Using existing character model:", modelAddr);
               }
             } catch (e) {
@@ -914,20 +908,15 @@ export const ProjectCreator: React.FC = () => {
       }
 
       // Extract the actual transaction like we did for other transactions
-      let finalTreeTransaction = charactersTreeTransaction;
-      if (
-        charactersTreeTransaction &&
-        typeof charactersTreeTransaction === "object" &&
-        "tx" in charactersTreeTransaction
-      ) {
-        finalTreeTransaction = charactersTreeTransaction.tx;
-        console.log("🔍 Using tx property from tree transaction object");
-      }
+      const finalTreeTransaction = 
+        charactersTreeTransaction && typeof charactersTreeTransaction === "object" && "tx" in charactersTreeTransaction
+          ? charactersTreeTransaction.tx
+          : charactersTreeTransaction;
 
       const treeSignatures = await sendClientTransactions(
         client,
         walletWrapper,
-        finalTreeTransaction
+        finalTreeTransaction as any
       );
 
       let treeAddr;
@@ -941,8 +930,8 @@ export const ProjectCreator: React.FC = () => {
         } else {
           // Try to get from the transaction response metadata
           treeAddr =
-            charactersTreeTransaction?.charactersTree ||
-            treeResponse?.createCreateCharactersTreeTransaction
+            (charactersTreeTransaction as any)?.charactersTree ||
+            (treeResponse?.createCreateCharactersTreeTransaction as any)
               ?.charactersTree ||
             JSON.stringify(treeSignatures[0]);
         }
@@ -1055,7 +1044,7 @@ export const ProjectCreator: React.FC = () => {
             profile: profileAddress,
             authority: publicKey.toString(), // Use your connected wallet as authority
             platformData: {
-              addXp: xpToAdd,
+              addXp: xpToAdd.toString(),
               addAchievements: achievementsToAdd,
               custom: {
                 add: [["lastUpdated", new Date().toISOString()]],
@@ -1081,7 +1070,7 @@ export const ProjectCreator: React.FC = () => {
         connected: true,
       };
 
-      const actualTransaction = txResponse.tx || txResponse;
+      const actualTransaction = ('tx' in txResponse ? txResponse.tx : txResponse) as any;
 
       console.log('🔍 About to sign XP transaction with wallet:', publicKey.toString());
       const signatures = await sendClientTransactions(
@@ -1128,7 +1117,7 @@ export const ProjectCreator: React.FC = () => {
       // Find user's profile in the current project specifically
       const userProfiles = await client.findProfiles(
         {
-          wallets: [publicKey.toString()],
+          addresses: [publicKey.toString()],
           projects: [import.meta.env.VITE_PUBLIC_HONEYCOMB_PROJECT_ADDRESS]
         },
         {
@@ -1144,7 +1133,7 @@ export const ProjectCreator: React.FC = () => {
       }
 
       const userProfile = userProfiles.profile[0];
-      const profileAddress = userProfile.address || userProfile.id;
+      const profileAddress = userProfile.address || (userProfile as any).id;
 
       setXpUpdateStatus("🎯 Adding 100 XP to your profile...");
       await updatePlayerXP(profileAddress, 100, [0]); // Add 100 XP and first achievement

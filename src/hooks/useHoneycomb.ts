@@ -511,8 +511,8 @@ export const useHoneycomb = () => {
       }
 
       if (
-        !wallet?.adapter?.signTransaction ||
-        !wallet?.adapter?.signAllTransactions
+        !('signTransaction' in wallet.adapter) ||
+        !('signAllTransactions' in wallet.adapter)
       ) {
         console.log("❌ Wallet doesn't support required signing methods");
         return false;
@@ -619,11 +619,11 @@ export const useHoneycomb = () => {
               );
 
               let alternativeProfiles = null;
-              if (alternativeProfileResponse?.findProfiles?.profile) {
+              if ((alternativeProfileResponse as any)?.findProfiles?.profile) {
                 alternativeProfiles =
-                  alternativeProfileResponse.findProfiles.profile;
-              } else if (alternativeProfileResponse?.profile) {
-                alternativeProfiles = alternativeProfileResponse.profile;
+                  (alternativeProfileResponse as any).findProfiles.profile;
+              } else if ((alternativeProfileResponse as any)?.profile) {
+                alternativeProfiles = (alternativeProfileResponse as any).profile;
               }
 
               if (alternativeProfiles && alternativeProfiles.length > 0) {

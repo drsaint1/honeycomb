@@ -1170,7 +1170,6 @@ class NFTCarService {
         );
         console.error("❌ Error details:", {
           userWallet: wallet.publicKey.toString(),
-          transactionParams: transactionParams,
           errorMessage: createError.message,
         });
 
@@ -1182,8 +1181,14 @@ class NFTCarService {
 
           // Retry with project authority
           const retryParams = {
-            ...transactionParams,
+            uri: carTemplate.image,
+            project: this.projectAddress,
+            assemblerConfig: assemblerConfigAddr,
+            characterModel: characterModelAddr,
+            wallet: wallet.publicKey.toString(),
+            owner: wallet.publicKey.toString(),
             authority: projectAuthority, // Use project authority instead
+            payer: wallet.publicKey.toString(),
           };
 
           try {
@@ -1334,11 +1339,11 @@ class NFTCarService {
               success: true,
               mintAddress: mintAddress.toString(),
             };
-          } else if (sigObj.signature) {
+          } else if ('signature' in sigObj && sigObj.signature) {
             // Direct signature response
             console.log("📝 Direct signature found:", sigObj.signature);
             this.storeMintInfo(
-              sigObj.signature,
+              sigObj.signature as string,
               wallet.publicKey.toString(),
               carType,
               null
@@ -1346,7 +1351,7 @@ class NFTCarService {
 
             return {
               success: true,
-              mintAddress: sigObj.signature,
+              mintAddress: 'signature' in sigObj ? (sigObj.signature as string) : '',
             };
           } else {
             throw new Error(
@@ -1934,7 +1939,9 @@ class NFTCarService {
       );
 
       if (signatures && signatures.length > 0) {
-        return { success: true, poolAddress: signatures[0] };
+        const poolAddress = typeof signatures[0] === 'string' ? signatures[0] : 
+                          (signatures[0] as any).signature || 'unknown';
+        return { success: true, poolAddress };
       }
 
       return { success: false, error: "Failed to create staking pool" };

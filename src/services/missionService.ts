@@ -1057,14 +1057,20 @@ export class MissionService {
         };
         
         const signatures = await sendClientTransactions(this.client, walletWrapper, individualTxResponse);
-        allSignatures.push(...signatures);
+        const stringSignatures = signatures.map(sig => 
+          typeof sig === 'string' ? sig : (sig as any).signature || JSON.stringify(sig)
+        );
+        allSignatures.push(...stringSignatures);
         console.log(`✅ Mission transaction ${i + 1}/${transactions.length} sent:`, signatures);
       }
     } else {
       // Fallback - create single transaction object
       const txResponse = { blockhash, lastValidBlockHeight, transactions };
       const signatures = await sendClientTransactions(this.client, walletWrapper, txResponse);
-      allSignatures.push(...signatures);
+      const stringSignatures2 = signatures.map(sig => 
+        typeof sig === 'string' ? sig : (sig as any).signature || JSON.stringify(sig)
+      );
+      allSignatures.push(...stringSignatures2);
     }
     
     console.log('✅ Character sent on mission successfully:', allSignatures);
@@ -1140,7 +1146,10 @@ export class MissionService {
     const signatures = await sendClientTransactions(this.client, walletWrapper, txResponse);
     console.log('✅ Character recalled from mission successfully:', signatures);
     
-    return signatures;
+    const stringSignatures = signatures.map(sig => 
+      typeof sig === 'string' ? sig : (sig as any).signature || JSON.stringify(sig)
+    );
+    return stringSignatures;
   }
 
   /**

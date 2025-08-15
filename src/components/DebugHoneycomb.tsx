@@ -5,15 +5,14 @@ import { useHoneycomb } from "../hooks/useHoneycomb";
 const DebugHoneycomb: React.FC = () => {
   const {
     playerProfile,
-    gameResources,
     loading,
     updateGameStats,
     updateMissionProgress,
-    clearAndRecreateProfile,
-    // NEW: Honeycomb status
     honeycombStatus,
     honeycombProject,
-    tryCreateHoneycombAssets,
+    initializeHoneycombIntegration,
+    refreshHoneycombProfile,
+    forceOnChainSync,
   } = useHoneycomb();
 
   const testStatsUpdate = async () => {
@@ -25,6 +24,7 @@ const DebugHoneycomb: React.FC = () => {
       obstaclesAvoided: 3,
       bonusBoxesCollected: 2,
       gameCompleted: true,
+      lapTime: 45.5,
     };
 
     console.log("📤 Sending test stats:", testStats);
@@ -77,22 +77,22 @@ const DebugHoneycomb: React.FC = () => {
 
       <div style={{ marginBottom: "10px" }}>
         <strong>Honeycomb Status:</strong>{" "}
-        {honeycombStatus === "created"
+        {honeycombStatus === "ready"
           ? "🍯 Connected"
-          : honeycombStatus === "creating"
+          : honeycombStatus === "initializing"
           ? "⏳ Creating..."
           : honeycombStatus === "error"
           ? "❌ Failed"
           : "⚠️ Local Only"}
       </div>
 
-      {playerProfile?.honeycombCreated && (
+      {honeycombStatus === "ready" && honeycombProject && (
         <div
           style={{ marginBottom: "10px", fontSize: "10px", color: "#90EE90" }}
         >
-          📍 Project: {playerProfile.honeycombProjectId?.slice(0, 8)}...
+          📍 Project: {honeycombProject.address?.slice(0, 8)}...
           <br />
-          📍 Profile: {playerProfile.honeycombProfileAddress?.slice(0, 8)}...
+          📍 Profile: {honeycombProject?.address?.slice(0, 8)}...
         </div>
       )}
 
@@ -140,7 +140,7 @@ const DebugHoneycomb: React.FC = () => {
         </button>
 
         <button
-          onClick={clearAndRecreateProfile}
+          onClick={refreshHoneycombProfile}
           style={{
             background: "#ff6b6b",
             color: "white",
@@ -154,9 +154,9 @@ const DebugHoneycomb: React.FC = () => {
           🗑️ Clear & Recreate Profile
         </button>
 
-        {honeycombStatus !== "created" && honeycombStatus !== "creating" && (
+        {honeycombStatus !== "ready" && honeycombStatus !== "initializing" && (
           <button
-            onClick={tryCreateHoneycombAssets}
+            onClick={initializeHoneycombIntegration}
             style={{
               background: "#FFA500",
               color: "white",

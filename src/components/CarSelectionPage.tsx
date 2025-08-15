@@ -59,7 +59,7 @@ export const CarSelectionPage: React.FC<CarSelectionPageProps> = ({ onCarSelecte
         
         cars = cars.map((car, index) => {
           if (car.name === "Assembled Racing Car" && index < defaultMappings.length) {
-            return { ...car, ...defaultMappings[index] };
+            return { ...car, ...defaultMappings[index] } as NFTCar;
           }
           return car;
         });

@@ -415,7 +415,7 @@ class CombinedTransactionService {
           success: true,
           speedyTokensEarned: estimatedTokens,
           honeycombStatsUpdated: true,
-          transactionSignature: signatures[1],
+          transactionSignature: typeof signatures[1] === 'string' ? signatures[1] : (signatures[1] as any).signature || 'unknown',
         };
       }
 
